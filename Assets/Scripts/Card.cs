@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Card : MonoBehaviour {
+public abstract class Card : MonoBehaviour {
 
     public void slowMove(Vector3 nextPosition)
     {
@@ -36,11 +36,13 @@ public class Card : MonoBehaviour {
     private IEnumerator inMoveCoroutine()
     {
         float finalScale = 0.7f;
-        for (float t = 0.1f; t < finalScale; t += Time.deltaTime / 0.05f)
+        for (float t = 0.1f; t < finalScale; t += Time.deltaTime / 0.2f)
         {
             transform.localScale = new Vector3(t, t, t);
             yield return null;
         }
         transform.localScale = new Vector3(finalScale, finalScale, finalScale);
     }
+
+    public abstract void activateAction();
 }

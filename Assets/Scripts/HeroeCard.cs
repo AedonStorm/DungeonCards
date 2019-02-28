@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,5 +18,10 @@ public class HeroeCard : Card {
     public void move(int nextPosition)
     {
         tableController.move(nextPosition);
+    }
+
+    public override void activateAction()
+    {
+        //throw new NotImplementedException();
     }
 }

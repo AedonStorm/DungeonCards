@@ -9,7 +9,7 @@ public class TableController : MonoBehaviour {
     //size 3x4
     private List<Card> tableCardList;
 
-    [SerializeField] private GameObject defaultCard;
+    [SerializeField] private GameObject[] cardTypes;
     [SerializeField] private GameObject heroeCard;
     private HeroeCard currentHeroeCard;
     private int currentHeroePosition;
@@ -31,13 +31,13 @@ public class TableController : MonoBehaviour {
             }
             else
             {
-                card = Instantiate(defaultCard, transform.GetChild(i).position, Quaternion.Euler(0, 180, 0)).GetComponent<Card>();
+                card = Instantiate(cardTypes[Random.Range(0,cardTypes.Length)], transform.GetChild(i).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
             }
 
             tableCardList.Add(card);
         }
 
-        updateDirections();
+        updateDirections(currentHeroePosition);
     }
 	
 	// Update is called once per frame
@@ -59,16 +59,15 @@ public class TableController : MonoBehaviour {
         }
     }
 
-    private void updateDirections()
+    private void updateDirections(int newDirection)
     {
         //0 1 2 3
         //4 5 6 7
         //8 9 10 11
-        enableDirection(true);
-        if (currentHeroePosition == 0 || currentHeroePosition == 4 || currentHeroePosition == 8) currentHeroeCard.directionLeft.disable(); else currentHeroeCard.directionLeft.gameObject.SetActive(true);
-        if (currentHeroePosition < 4) currentHeroeCard.directionUp.disable(); else currentHeroeCard.directionUp.gameObject.SetActive(true);
-        if (currentHeroePosition == 3 || currentHeroePosition == 7 || currentHeroePosition == 11) currentHeroeCard.directionRight.disable(); else currentHeroeCard.directionRight.gameObject.SetActive(true);
-        if (currentHeroePosition >= 8) currentHeroeCard.directionDown.disable(); else currentHeroeCard.directionDown.gameObject.SetActive(true);
+        if (newDirection == 0 || newDirection == 4 || newDirection == 8) currentHeroeCard.directionLeft.disable(); else currentHeroeCard.directionLeft.gameObject.SetActive(true);
+        if (newDirection < 4) currentHeroeCard.directionUp.disable(); else currentHeroeCard.directionUp.gameObject.SetActive(true);
+        if (newDirection == 3 || newDirection == 7 || newDirection == 11) currentHeroeCard.directionRight.disable(); else currentHeroeCard.directionRight.gameObject.SetActive(true);
+        if (newDirection >= 8) currentHeroeCard.directionDown.disable(); else currentHeroeCard.directionDown.gameObject.SetActive(true);
     }
 
     public void move(int nextPosition)
@@ -83,19 +82,33 @@ public class TableController : MonoBehaviour {
 
     private void updateHeroePosition(int nextPosition)
     {
-        Destroy(tableCardList[currentHeroePosition + nextPosition].gameObject, 0.5f);
-        tableCardList[currentHeroePosition + nextPosition] = currentHeroeCard;
+        int newDirection = currentHeroePosition + nextPosition;
+        Destroy(tableCardList[newDirection].gameObject, 0.5f);
+        tableCardList[newDirection] = currentHeroeCard;
         int replacementPosition = getReplacementPosition(intToDirection(nextPosition));
+        updateDirections(newDirection);
 
+        StartCoroutine(moveReplacementCard(replacementPosition, nextPosition));
+    }
+
+    private IEnumerator moveReplacementCard(int replacementPosition, int nextPosition)
+    {
+        yield return new WaitForSeconds(0.3f);
         tableCardList[replacementPosition].slowMove(transform.GetChild(currentHeroePosition).position);
-
-        Card newCard = Instantiate(defaultCard, transform.GetChild(replacementPosition).position, Quaternion.Euler(0, 180, 0)).GetComponent<Card>();
-
         tableCardList[currentHeroePosition] = tableCardList[replacementPosition];
+
+        StartCoroutine(createNewCard(replacementPosition, nextPosition));
+    }
+
+    private IEnumerator createNewCard(int replacementPosition, int nextPosition)
+    {
+        yield return new WaitForSeconds(0.3f);
+        Card newCard = Instantiate(cardTypes[Random.Range(0, cardTypes.Length)], transform.GetChild(replacementPosition).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
         tableCardList[replacementPosition] = newCard;
         currentHeroePosition += nextPosition;
-        updateDirections();
+        enableDirection(true);
     }
+
     private Direction intToDirection (int dir)
     {
         switch (dir)
