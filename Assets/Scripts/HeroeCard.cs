@@ -5,10 +5,10 @@ using UnityEngine.EventSystems;
 
 public class HeroeCard : Card {
 
-    public GameObject directionLeft;
-    public GameObject directionRight;
-    public GameObject directionUp;
-    public GameObject directionDown;
+    public DirectionButton directionLeft;
+    public DirectionButton directionRight;
+    public DirectionButton directionUp;
+    public DirectionButton directionDown;
 
     private TableController tableController;
 

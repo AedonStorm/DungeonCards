@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Direction { none = 0, left = -1, right = +1, up = -4, down = +4 }
+
 public class TableController : MonoBehaviour {
 
     //size 3x4
@@ -35,7 +37,7 @@ public class TableController : MonoBehaviour {
             tableCardList.Add(card);
         }
 
-        updateDirecctions();
+        updateDirections();
     }
 	
 	// Update is called once per frame
@@ -46,10 +48,10 @@ public class TableController : MonoBehaviour {
 
             if (hit.collider != null)
             {
-                Debug.Log("Target Position: " + hit.collider.gameObject.transform.position);
+                //  Debug.Log("Target Position: " + hit.collider.gameObject.transform.position);
                 if (hit.collider.tag == "Direction")
                 {
-                    hideDirection();
+                    enableDirection(false);
                     int nextPosition = hit.collider.GetComponent<DirectionButton>().movePosition;
                     move(nextPosition);
                 }
@@ -57,43 +59,90 @@ public class TableController : MonoBehaviour {
         }
     }
 
-    private void updateDirecctions()
+    private void updateDirections()
     {
         //0 1 2 3
         //4 5 6 7
         //8 9 10 11
-        
-        if (currentHeroePosition == 0 || currentHeroePosition == 4 || currentHeroePosition == 8) currentHeroeCard.directionLeft.SetActive(false); else currentHeroeCard.directionLeft.SetActive(true);
-        if (currentHeroePosition < 4) currentHeroeCard.directionUp.SetActive(false); else currentHeroeCard.directionUp.SetActive(true);
-        if (currentHeroePosition == 3 || currentHeroePosition == 7 || currentHeroePosition == 11) currentHeroeCard.directionRight.SetActive(false); else currentHeroeCard.directionRight.SetActive(true);
-        if (currentHeroePosition >= 8) currentHeroeCard.directionDown.SetActive(false); else currentHeroeCard.directionDown.SetActive(true);
+        enableDirection(true);
+        if (currentHeroePosition == 0 || currentHeroePosition == 4 || currentHeroePosition == 8) currentHeroeCard.directionLeft.disable(); else currentHeroeCard.directionLeft.gameObject.SetActive(true);
+        if (currentHeroePosition < 4) currentHeroeCard.directionUp.disable(); else currentHeroeCard.directionUp.gameObject.SetActive(true);
+        if (currentHeroePosition == 3 || currentHeroePosition == 7 || currentHeroePosition == 11) currentHeroeCard.directionRight.disable(); else currentHeroeCard.directionRight.gameObject.SetActive(true);
+        if (currentHeroePosition >= 8) currentHeroeCard.directionDown.disable(); else currentHeroeCard.directionDown.gameObject.SetActive(true);
     }
-    
-    private void updateHeroePosition()
-    {
-        Destroy(tableCardList[currentHeroePosition].gameObject);
-        tableCardList[currentHeroePosition] = currentHeroeCard;
-        updateDirecctions();
-    }
-
-
-    public int getCurrentHeroePosition() { return currentHeroePosition; }
 
     public void move(int nextPosition)
     {
-        currentHeroePosition += nextPosition;
-        tableCardList[currentHeroePosition].outMove();
-        currentHeroeCard.slowMove(tableCardList[currentHeroePosition].transform.position);
+        // currentHeroePosition += nextPosition;
+        var nextHeroePosition = currentHeroePosition + nextPosition;
+        tableCardList[nextHeroePosition].outMove();
+        currentHeroeCard.slowMove(tableCardList[nextHeroePosition].transform.position);
 
-        Invoke("updateHeroePosition", 0.5f);
+        updateHeroePosition(nextPosition);
     }
 
-
-    private void hideDirection()
+    private void updateHeroePosition(int nextPosition)
     {
-        currentHeroeCard.directionLeft.SetActive(false);
-        currentHeroeCard.directionRight.SetActive(false);
-        currentHeroeCard.directionUp.SetActive(false);
-        currentHeroeCard.directionDown.SetActive(false);
+        Destroy(tableCardList[currentHeroePosition + nextPosition].gameObject, 0.5f);
+        tableCardList[currentHeroePosition + nextPosition] = currentHeroeCard;
+        int replacementPosition = getReplacementPosition(intToDirection(nextPosition));
+
+        tableCardList[replacementPosition].slowMove(transform.GetChild(currentHeroePosition).position);
+
+        Card newCard = Instantiate(defaultCard, transform.GetChild(replacementPosition).position, Quaternion.Euler(0, 180, 0)).GetComponent<Card>();
+
+        tableCardList[currentHeroePosition] = tableCardList[replacementPosition];
+        tableCardList[replacementPosition] = newCard;
+        currentHeroePosition += nextPosition;
+        updateDirections();
     }
+    private Direction intToDirection (int dir)
+    {
+        switch (dir)
+        {
+            case 1: return Direction.right;
+            case -1: return Direction.left;
+            case 4: return Direction.down;
+            case -4: return Direction.up;
+        }
+
+        return Direction.none;
+    }
+
+
+    private void enableDirection(bool enable)
+    {
+        currentHeroeCard.directionLeft.GetComponent<Collider2D>().enabled = enable;
+        currentHeroeCard.directionRight.GetComponent<Collider2D>().enabled = enable;
+        currentHeroeCard.directionUp.GetComponent<Collider2D>().enabled = enable;
+        currentHeroeCard.directionDown.GetComponent<Collider2D>().enabled = enable;
+    }
+
+    private int getReplacementPosition(Direction currentDirection)
+    {
+        switch (currentDirection)
+        {
+            case Direction.left:
+                if (currentHeroePosition == 0) return currentHeroePosition + 4;
+                else if (currentHeroePosition == 8) return currentHeroePosition - 4;
+                else return currentHeroePosition + 1;
+            case Direction.right:
+                if (currentHeroePosition == 0) return currentHeroePosition + 4;
+                else if (currentHeroePosition == 8) return currentHeroePosition - 4;
+                else return currentHeroePosition - 1;
+            case Direction.up:
+                if (currentHeroePosition == 11) return currentHeroePosition - 1;
+                else if (currentHeroePosition == 8) return currentHeroePosition + 1;
+                else return currentHeroePosition + 4;
+            case Direction.down:
+                if (currentHeroePosition == 11) return currentHeroePosition - 1;
+                else if (currentHeroePosition == 8) return currentHeroePosition + 1;
+                else return currentHeroePosition - 4;
+            default:
+                break;
+        }
+
+        return -1;
+    }
+    
 }
