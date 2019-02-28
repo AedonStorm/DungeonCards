@@ -28,4 +28,19 @@ public class Card : MonoBehaviour {
             yield return null;
         }
     }
+
+    private void OnEnable()
+    {
+        StartCoroutine(inMoveCoroutine());
+    }
+    private IEnumerator inMoveCoroutine()
+    {
+        float finalScale = 0.7f;
+        for (float t = 0.1f; t < finalScale; t += Time.deltaTime / 0.05f)
+        {
+            transform.localScale = new Vector3(t, t, t);
+            yield return null;
+        }
+        transform.localScale = new Vector3(finalScale, finalScale, finalScale);
+    }
 }

@@ -123,20 +123,20 @@ public class TableController : MonoBehaviour {
         switch (currentDirection)
         {
             case Direction.left:
-                if (currentHeroePosition == 0) return currentHeroePosition + 4;
-                else if (currentHeroePosition == 8) return currentHeroePosition - 4;
+                if (currentHeroePosition == 3) return currentHeroePosition + 4;
+                else if (currentHeroePosition == 7 || currentHeroePosition == 11) return currentHeroePosition - 4;
                 else return currentHeroePosition + 1;
             case Direction.right:
                 if (currentHeroePosition == 0) return currentHeroePosition + 4;
-                else if (currentHeroePosition == 8) return currentHeroePosition - 4;
+                else if (currentHeroePosition == 4 || currentHeroePosition == 8) return currentHeroePosition - 4;
                 else return currentHeroePosition - 1;
             case Direction.up:
-                if (currentHeroePosition == 11) return currentHeroePosition - 1;
-                else if (currentHeroePosition == 8) return currentHeroePosition + 1;
+                if (currentHeroePosition == 9 || currentHeroePosition == 11) return currentHeroePosition - 1;
+                else if (currentHeroePosition == 8 || currentHeroePosition == 10) return currentHeroePosition + 1;
                 else return currentHeroePosition + 4;
             case Direction.down:
-                if (currentHeroePosition == 11) return currentHeroePosition - 1;
-                else if (currentHeroePosition == 8) return currentHeroePosition + 1;
+                if (currentHeroePosition == 1 || currentHeroePosition == 3) return currentHeroePosition - 1;
+                else if (currentHeroePosition == 0 || currentHeroePosition == 2) return currentHeroePosition + 1;
                 else return currentHeroePosition - 4;
             default:
                 break;
