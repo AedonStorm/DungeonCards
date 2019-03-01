@@ -65,6 +65,7 @@ public abstract class Card : MonoBehaviour {
             transform.localScale = new Vector3(t, t, t);
             yield return null;
         }
+        Destroy(gameObject);
     }
 
     private void OnEnable()

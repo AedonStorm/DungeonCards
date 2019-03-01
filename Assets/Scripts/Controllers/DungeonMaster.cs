@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum cardType { enemy, chest, coin, potion }
+public enum enemyType { Minion, Boar, WoodSpider, Skeleton, ForestKeeper, Overlord}
 
 public class DungeonMaster {
 
@@ -32,9 +33,9 @@ public class DungeonMaster {
 
         GameObject card;
 
-        if (rand < 30) card = cardCoin;
-        else if (rand < 40) card = cardPotion;
-        else if (rand < 60) card = cardChest;
+        if (rand < 40) card = cardCoin;
+        else if (rand < 50) card = cardPotion;
+        else if (rand < 70) card = cardChest;
         else
         {
             int randEnemy = Random.Range(0, 100);
@@ -49,6 +50,9 @@ public class DungeonMaster {
         //card.GetComponent<Card>().initializePower(Random.Range(1, 19));
         return card;
     }
+
+    public GameObject getPotion() { return cardPotion; }
+    public GameObject getCoin() { return cardCoin; }
 
     //public Card InitializeCard()
     //{

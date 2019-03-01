@@ -63,27 +63,47 @@ public class TableController : MonoBehaviour {
                 {
                     enableDirection(false);
                     int nextPosition = hit.collider.GetComponent<DirectionButton>().movePosition;// + currentHeroePosition;
-
-                    ActionImpl actionImpl = tableCardList[nextPosition + currentHeroePosition].activateAction();
-                     Debug.Log("Power: " + actionImpl.power);
+                    int pos = nextPosition + currentHeroePosition;
+                    ActionImpl actionImpl = tableCardList[pos].activateAction();
+                    //Debug.Log("Power: " + actionImpl.power);
                     switch (actionImpl.action)
                     {
                         case Action.None:
                             break;
                         case Action.Chest:
+                            tableCardList[pos].outMove();
+                            GameObject reward = Random.Range(0, 1) == 0 ? dungeonMaster.getCoin() : dungeonMaster.getPotion();
+                            Card rewardCard = Instantiate(reward, transform.GetChild(pos).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+                            rewardCard.GetComponent<Card>().initializePower(Random.Range(1, 19));
+                            tableCardList[pos] = rewardCard;
+                            enableDirection(true);
                             break;
                         case Action.Power:
-                            //Debug.Log("Power: " + actionImpl.power);
                             currentHeroeCard.setPower(actionImpl.power);
+
+                            if (actionImpl.power < 0)
+                            {
+                                tableCardList[pos].outMove();
+                                Card newCoinCard = Instantiate(dungeonMaster.getCoin(), transform.GetChild(pos).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+                                newCoinCard.GetComponent<Card>().initializePower(Random.Range(1, 19));
+                                tableCardList[pos] = newCoinCard;
+                                enableDirection(true);
+                            }
+                            else
+                            {
+                                move(nextPosition);
+                            }
+                            //Debug.Log("Power: " + actionImpl.power);
                             break;
                         case Action.Coins:
                             //Debug.Log("Coins: "+ actionImpl.power);
                             gameController.onCoin(actionImpl.power);
+                            move(nextPosition);
                             break;
                         default:
+                            move(nextPosition);
                             break;
                     }
-                    move(nextPosition);
                 }
             }
         }
@@ -113,7 +133,7 @@ public class TableController : MonoBehaviour {
     private void updateHeroePosition(int nextPosition)
     {
         int newDirection = currentHeroePosition + nextPosition;
-        Destroy(tableCardList[newDirection].gameObject, 0.5f);
+        //Destroy(tableCardList[newDirection].gameObject, 0.5f);
         tableCardList[newDirection] = currentHeroeCard;
         int replacementPosition = getReplacementPosition(intToDirection(nextPosition));
         updateDirections(newDirection);
