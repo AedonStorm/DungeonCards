@@ -6,15 +6,23 @@ public enum Direction { none = 0, left = -1, right = +1, up = -4, down = +4 }
 
 public class TableController : MonoBehaviour {
 
+    private GameController gameController;
+    private DungeonMaster dungeonMaster;
+
     //size 3x4
     private List<Card> tableCardList;
 
-    [SerializeField] private GameObject[] cardTypes;
-    [SerializeField] private GameObject heroeCard;
+    private GameObject heroeCard;
     private HeroeCard currentHeroeCard;
     private int currentHeroePosition;
 
     private TableController instance;
+
+    public void setupTableController(GameController gameController, DungeonMaster dungeonMaster, GameObject heroeCard) {
+        this.gameController = gameController;
+        this.dungeonMaster = dungeonMaster;
+        this.heroeCard = heroeCard;
+    }
 
     // Use this for initialization
     void Start () {
@@ -28,10 +36,12 @@ public class TableController : MonoBehaviour {
                 GameObject obj = Instantiate(heroeCard, transform.GetChild(i).position, Quaternion.identity);
                 card = obj.GetComponent<Card>();
                 currentHeroeCard = obj.GetComponent<HeroeCard>();
+                currentHeroeCard.initializePower(Random.Range(6, 14));
             }
             else
             {
-                card = Instantiate(cardTypes[Random.Range(0,cardTypes.Length)], transform.GetChild(i).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+                card = Instantiate( dungeonMaster.getRandomCard(), transform.GetChild(i).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+                card.GetComponent<Card>().initializePower(Random.Range(1, 19));
             }
 
             tableCardList.Add(card);
@@ -52,7 +62,27 @@ public class TableController : MonoBehaviour {
                 if (hit.collider.tag == "Direction")
                 {
                     enableDirection(false);
-                    int nextPosition = hit.collider.GetComponent<DirectionButton>().movePosition;
+                    int nextPosition = hit.collider.GetComponent<DirectionButton>().movePosition;// + currentHeroePosition;
+
+                    ActionImpl actionImpl = tableCardList[nextPosition + currentHeroePosition].activateAction();
+                     Debug.Log("Power: " + actionImpl.power);
+                    switch (actionImpl.action)
+                    {
+                        case Action.None:
+                            break;
+                        case Action.Chest:
+                            break;
+                        case Action.Power:
+                            //Debug.Log("Power: " + actionImpl.power);
+                            currentHeroeCard.setPower(actionImpl.power);
+                            break;
+                        case Action.Coins:
+                            //Debug.Log("Coins: "+ actionImpl.power);
+                            gameController.onCoin(actionImpl.power);
+                            break;
+                        default:
+                            break;
+                    }
                     move(nextPosition);
                 }
             }
@@ -103,7 +133,8 @@ public class TableController : MonoBehaviour {
     private IEnumerator createNewCard(int replacementPosition, int nextPosition)
     {
         yield return new WaitForSeconds(0.3f);
-        Card newCard = Instantiate(cardTypes[Random.Range(0, cardTypes.Length)], transform.GetChild(replacementPosition).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+        Card newCard = Instantiate(dungeonMaster.getRandomCard(), transform.GetChild(replacementPosition).position, Quaternion.Euler(0, 0, 0)).GetComponent<Card>();
+        newCard.GetComponent<Card>().initializePower(Random.Range(1, 19));
         tableCardList[replacementPosition] = newCard;
         currentHeroePosition += nextPosition;
         enableDirection(true);

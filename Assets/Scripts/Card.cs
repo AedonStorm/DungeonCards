@@ -1,8 +1,46 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+
+public enum Action { None, Chest, Power, Coins}
+public class ActionImpl
+{
+    public Action action;
+    public int power;
+
+    public ActionImpl (Action action, int power)
+    {
+        this.action = action;
+        this.power = power;
+    }
+}
 
 public abstract class Card : MonoBehaviour {
+
+    public TextMeshProUGUI powerText;
+
+    private int power = 0;
+    public int getPower() { return power; }
+    public void initializePower(int modifier)
+    {
+        power = modifier;
+        updateText();
+    }
+    public void setPower(int modifier)
+    {
+        power += modifier;
+        updateText();
+        if (power <= 0)
+            Debug.Log("Die");
+    }
+
+    private void updateText()
+    {
+         powerText.text = power.ToString();
+    }
+
+    protected abstract void finalAction();
 
     public void slowMove(Vector3 nextPosition)
     {
@@ -44,5 +82,5 @@ public abstract class Card : MonoBehaviour {
         transform.localScale = new Vector3(finalScale, finalScale, finalScale);
     }
 
-    public abstract void activateAction();
+    public abstract ActionImpl activateAction();
 }

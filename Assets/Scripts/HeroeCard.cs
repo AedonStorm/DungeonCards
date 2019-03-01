@@ -20,8 +20,13 @@ public class HeroeCard : Card {
         tableController.move(nextPosition);
     }
 
-    public override void activateAction()
+    public override ActionImpl activateAction()
     {
-        //throw new NotImplementedException();
+        throw new NotImplementedException();
+    }
+
+    protected override void finalAction()
+    {
+        //throw new NotImplementedException(); Diee
     }
 }

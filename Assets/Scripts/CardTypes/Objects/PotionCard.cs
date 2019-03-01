@@ -5,8 +5,13 @@ using UnityEngine;
 
 public class PotionCard : Card
 {
-    public override void activateAction()
+    public override ActionImpl activateAction()
     {
-        throw new NotImplementedException();
+        return new ActionImpl(Action.Power, getPower());
+    }
+
+    protected override void finalAction()
+    {
+        //throw new NotImplementedException();
     }
 }

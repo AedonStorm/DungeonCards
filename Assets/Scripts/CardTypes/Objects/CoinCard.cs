@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class CoinCard : Card {
 
-    public override void activateAction()
+    public override ActionImpl activateAction()
+    {
+        return new ActionImpl(Action.Coins, getPower());
+    }
+
+    protected override void finalAction()
     {
         //throw new NotImplementedException();
     }
